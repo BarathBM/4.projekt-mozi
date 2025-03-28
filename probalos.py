@@ -6,7 +6,7 @@ Image.CUBIC = Image.BICUBIC
 import ttkbootstrap as tb
 from ttkbootstrap.constants import *
 from tkinter import messagebox, Toplevel, Entry, Label, Button, IntVar, Spinbox
-from fpdf import FPDF
+
 
 
 root=tb.Window(themename="darkly")
