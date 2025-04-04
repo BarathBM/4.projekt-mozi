@@ -47,20 +47,20 @@ def create_database():
     conn.close()
 
 
-
-
-
-label = Label(root, text="MigaBiga", font=("Arial", 40))
-label.pack(pady=10)
+def Folgalolist():
+    seat_window = Toplevel(root)
+    seat_window.title("Székfoglalás")
+    Label(seat_window, text="Itt foglalhatod le a széked.").pack(pady=10)
 
 def Filmlist():
     subprocess.Popen(["python", "probalos.py"])
 
-label = Label(root, text="Válassz egy lehetőséget:", font=("Arial", 12))
+label = Label(root, text="Válassz egy lehetőséget:", font=("Arial", 20))
 label.pack(pady=10)
 
 
-
+seat_button = Button(root, text="Székfoglalás", command=Folgalolist)
+seat_button.pack(pady=5)
 
 movie_button = Button(root, text="Filmlista", command=Filmlist)
 movie_button.pack(pady=5)
