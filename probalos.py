@@ -4,43 +4,7 @@ from ttkbootstrap.constants import *
 from tkinter import Toplevel, Label, Button, BOTH
 from ttkbootstrap.widgets import Meter
 
-def create_database():
-    conn = sqlite3.connect("mozi.db")
-    cursor = conn.cursor()
 
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS Termek (
-        terem_szam INTEGER PRIMARY KEY,
-        film_cim TEXT NOT NULL,
-        mufaj TEXT,
-        evszam INTEGER,
-        jatekido INTEGER,
-        kapacitas INTEGER
-    )
-    """) 
-
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS Foglalasok (
-        foglalas_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        keresztnev TEXT NOT NULL,
-        vezeteknev TEXT NOT NULL,
-        terem_szam INTEGER,
-        szek_szam INTEGER,
-        FOREIGN KEY (terem_szam) REFERENCES Termek(terem_szam)
-    )
-    """)
-
-    cursor.execute("SELECT COUNT(*) FROM Termek")
-    if cursor.fetchone()[0] == 0:
-        filmek = [
-            (1, "Dűne: Második rész", "Sci-Fi", 2024, 165, 100),
-            (2, "Oppenheimer", "Dráma", 2023, 180, 80),
-            (3, "Avatar 2", "Akció", 2022, 192, 120),
-        ]
-        cursor.executemany("INSERT INTO Termek VALUES (?, ?, ?, ?, ?, ?)", filmek)
-    
-    conn.commit()
-    conn.close()
 
 def load_films():
     conn = sqlite3.connect("mozi.db")
@@ -110,15 +74,14 @@ root.geometry("800x600")
 
 Label(root, text="Válassz filmet:", font=("Arial", 16)).pack(pady=10)
 
-film_lista = tb.Treeview(root, columns=("terem", "cim", "helyek"), show="headings")
+film_lista = tb.Treeview(root, columns=("terem", "cim",), show="headings")
 film_lista.heading("terem", text="Terem")
 film_lista.heading("cim", text="Film címe")
-film_lista.heading("helyek", text="Szabad helyek")
 film_lista.pack(fill=BOTH, expand=True, padx=10, pady=10)
 
 film_lista.bind("<Double-1>", show_film_details) 
 
-create_database()
+
 load_films()
 
 root.mainloop()
