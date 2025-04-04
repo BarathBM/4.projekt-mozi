@@ -54,7 +54,7 @@ def show_film_details(event, root, film_lista):
     meter.pack(pady=10)
 
 def Foglalo():
-    subprocess.Popen(["python", "probalos.py"])
+    subprocess.Popen(["python", "foglalos.py"])
     
 movie_button = Button(text="Székfoglalás", command=Foglalo)
 movie_button.pack(pady=5)
