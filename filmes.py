@@ -5,9 +5,6 @@ from tkinter import Toplevel, Label, Button, BOTH
 from ttkbootstrap.widgets import Meter
 from tkinter import *
 import subprocess
-
-
-
 def load_films():
     conn = sqlite3.connect("mozi.db")
     cursor = conn.cursor()
@@ -69,22 +66,3 @@ def show_film_details(event):
         amountused=foglaltsagi_szint,
     )
     meter.pack(pady=10)
-
-root = tb.Window(themename="darkly")
-root.title("Jegyfoglaló Rendszer")
-root.geometry("800x600")
-
-Label(root, text="Válassz filmet:", font=("Arial", 16)).pack(pady=10)
-
-
-film_lista = tb.Treeview(root, columns=("terem", "cim",), show="headings")
-film_lista.heading("terem", text="Terem")
-film_lista.heading("cim", text="Film címe")
-film_lista.pack(fill=BOTH, expand=True, padx=10, pady=10)
-
-film_lista.bind("<Double-1>", show_film_details) 
-
-load_films()
-
-
-root.mainloop()

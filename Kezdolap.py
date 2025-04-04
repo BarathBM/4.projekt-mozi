@@ -27,8 +27,6 @@ def create_database():
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS Foglalasok (
         foglalas_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        keresztnev TEXT NOT NULL,
-        vezeteknev TEXT NOT NULL,
         terem_szam INTEGER,
         szek_szam INTEGER,
         FOREIGN KEY (terem_szam) REFERENCES Termek(terem_szam)
@@ -47,21 +45,15 @@ def create_database():
     conn.close()
 
 
-def Folgalolist():
-    seat_window = Toplevel(root)
-    seat_window.title("Székfoglalás")
-    Label(seat_window, text="Itt foglalhatod le a széked.").pack(pady=10)
+
+
+
+label = Label(root, text="MigaBiga", font=("Arial", 40))
+label.pack(pady=10)
 
 def Filmlist():
     subprocess.Popen(["python", "probalos.py"])
 
-label = Label(root, text="Válassz egy lehetőséget:", font=("Arial", 12))
-label.pack(pady=10)
-
-
-seat_button = Button(root, text="Székfoglalás", command=Folgalolist)
-seat_button.pack(pady=5)
-
-movie_button = Button(root, text="Filmlista", command=Filmlist)
+movie_button = Button(root, text="Filmlista", command=Filmlist, width=7, height=2, font=("Arial",24) )
 movie_button.pack(pady=5)
 root.mainloop()
