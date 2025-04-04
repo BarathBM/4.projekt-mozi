@@ -1,67 +1,39 @@
-from tkinter import *
 import sqlite3
-import subprocess
 import ttkbootstrap as tb
 from ttkbootstrap.constants import *
-from tkinter import Toplevel, Label, Button, BOTH
-from ttkbootstrap.widgets import Meter
+from tkinter import Label, BOTH
+from filll import show_film_details
 
-root = tb.Window(themename="darkly")
-root.title("Adatbázis létrehozása")
-root.geometry("800x6000")
-def create_database():
+def load_films():
     conn = sqlite3.connect("mozi.db")
     cursor = conn.cursor()
-
     cursor.execute("""
-    CREATE TABLE IF NOT EXISTS Termek (
-        terem_szam INTEGER PRIMARY KEY,
-        film_cim TEXT NOT NULL,
-        mufaj TEXT,
-        evszam INTEGER,
-        jatekido INTEGER,
-        kapacitas INTEGER
-    )
-    """) 
-
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS Foglalasok (
-        foglalas_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        keresztnev TEXT NOT NULL,
-        vezeteknev TEXT NOT NULL,
-        terem_szam INTEGER,
-        szek_szam INTEGER,
-        FOREIGN KEY (terem_szam) REFERENCES Termek(terem_szam)
-    )
+        SELECT Termek.terem_szam, Termek.film_cim, Termek.kapacitas - COALESCE(foglalasok_db, 0) AS szabad_helyek
+        FROM Termek
+        LEFT JOIN (
+            SELECT terem_szam, COUNT(*) AS foglalasok_db FROM Foglalasok GROUP BY terem_szam
+        ) AS F ON Termek.terem_szam = F.terem_szam
     """)
-    cursor.execute("SELECT COUNT(*) FROM Termek")
-    if cursor.fetchone()[0] == 0:
-        filmek = [
-            (1, "Dűne: Második rész", "Sci-Fi", 2024, 165, 100),
-            (2, "Oppenheimer", "Dráma", 2023, 180, 80),
-            (3, "Avatar 2", "Akció", 2022, 192, 120),
-        ]
-        cursor.executemany("INSERT INTO Termek VALUES (?, ?, ?, ?, ?, ?)", filmek)
-    
-    conn.commit()
+    films = cursor.fetchall()
     conn.close()
+    
+    film_lista.delete(*film_lista.get_children())
+    for film in films:
+        film_lista.insert("", "end", values=film)
 
+root = tb.Window(themename="darkly")
+root.title("Jegyfoglaló Rendszer")
+root.geometry("800x600")
 
-def Folgalolist():
-    seat_window = Toplevel(root)
-    seat_window.title("Székfoglalás")
-    Label(seat_window, text="Itt foglalhatod le a széked.").pack(pady=10)
+Label(root, text="Válassz filmet:", font=("Arial", 16)).pack(pady=10)
 
-def Filmlist():
-    subprocess.Popen(["python", "probalos.py"])
+film_lista = tb.Treeview(root, columns=("terem", "cim",), show="headings")
+film_lista.heading("terem", text="Terem")
+film_lista.heading("cim", text="Film címe")
+film_lista.pack(fill=BOTH, expand=True, padx=10, pady=10)
 
-label = Label(root, text="Válassz egy lehetőséget:", font=("Arial", 20))
-label.pack(pady=10)
+film_lista.bind("<Double-1>", lambda event: show_film_details(event, root, film_lista))
 
+load_films()
 
-seat_button = Button(root, text="Székfoglalás", command=Folgalolist)
-seat_button.pack(pady=5)
-
-movie_button = Button(root, text="Filmlista", command=Filmlist)
-movie_button.pack(pady=5)
 root.mainloop()
