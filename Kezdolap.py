@@ -55,13 +55,6 @@ label.pack(pady=10)
 
 def Filmlist():
     subprocess.Popen(["python", "probalos.py"])
-
-label = Label(root, text="Válassz egy lehetőséget:", font=("Arial", 12))
-label.pack(pady=10)
-
-
-
-
-movie_button = Button(root, text="Filmlista", command=Filmlist)
+movie_button = Button(root, text="Filmlista", command=Filmlist, font=("Arial",24),width=7,height=2)
 movie_button.pack(pady=5)
 root.mainloop()
