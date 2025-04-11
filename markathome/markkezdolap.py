@@ -3,18 +3,17 @@ import ttkbootstrap as tb
 from tkinter import Toplevel, Label, Button, Entry, OptionMenu, StringVar
 from ttkbootstrap.widgets import Progressbar
 from fpdf import FPDF
+from PIL import Image, ImageTk 
 
 root = tb.Window(themename="darkly")
 root.title("Adatbázis létrehozása")
-root.geometry("800x600")
+root.geometry("900x700")
 
-# Adatbázis létrehozása és inicializálása
 def create_database():
     conn = sqlite3.connect("mozi.db")
     cursor = conn.cursor()
 
-    # Táblák létrehozása (ha még nem léteznek)
-    cursor.execute("""
+    cursor.execute(""" 
     CREATE TABLE IF NOT EXISTS Termek (
         terem_szam INTEGER PRIMARY KEY,
         film_cim TEXT NOT NULL,
@@ -25,7 +24,7 @@ def create_database():
     )
     """)
 
-    cursor.execute("""
+    cursor.execute(""" 
     CREATE TABLE IF NOT EXISTS Foglalasok (
         foglalas_id INTEGER PRIMARY KEY AUTOINCREMENT,
         keresztnev TEXT NOT NULL,
@@ -37,7 +36,6 @@ def create_database():
     )
     """)
 
-    # Filmek hozzáadása, ha még nem léteznek
     filmek = [
         (1, "Dűne: Második rész", "Sci-Fi", 2024, 165, 100),
         (2, "Oppenheimer", "Dráma", 2023, 180, 80),
@@ -55,14 +53,21 @@ def create_database():
 
     for film in filmek:
         cursor.execute("SELECT COUNT(*) FROM Termek WHERE terem_szam=?", (film[0],))
-        if cursor.fetchone()[0] == 0:  # Ha nem létezik már a terem_szam
+        if cursor.fetchone()[0] == 0:  
             cursor.execute("INSERT INTO Termek VALUES (?, ?, ?, ?, ?, ?)", film)
     
     conn.commit()
     conn.close()
 
+def add_image():
+    img = Image.open("markathome/mozikep.jpg")  
+    img = img.resize((500, 300)) 
+    img_tk = ImageTk.PhotoImage(img) 
 
-# Filmek listája és jegyfoglalás
+    img_label = Label(root, image=img_tk)
+    img_label.image = img_tk  
+    img_label.pack(pady=20)
+
 def Filmlist():
     window = Toplevel(root)
     window.title("Filmek és foglalások")
@@ -79,18 +84,15 @@ def Filmlist():
     
     conn.close()
 
-# Jegyfoglalás
 def open_booking(film):
     window = Toplevel(root)
     window.title(f"{film[1]} - Jegyfoglalás")
 
-    # Film adatai
     Label(window, text=f"Film: {film[1]}", font=("Arial", 14)).pack(pady=10)
     Label(window, text=f"Műfaj: {film[2]}", font=("Arial", 12)).pack(pady=5)
     Label(window, text=f"Évszám: {film[3]}", font=("Arial", 12)).pack(pady=5)
     Label(window, text=f"Játékidő: {film[4]} perc", font=("Arial", 12)).pack(pady=5)
     
-    # Foglalás
     Label(window, text="Keresztnév: ", font=("Arial", 12)).pack(pady=5)
     first_name_entry = Entry(window, font=("Arial", 12))
     first_name_entry.pack(pady=5)
@@ -106,7 +108,6 @@ def open_booking(film):
     ticket_menu = OptionMenu(window, ticket_type_var, *ticket_types)
     ticket_menu.pack(pady=5)
 
-    # Foglaltság lekérése
     conn = sqlite3.connect("mozi.db")
     cursor = conn.cursor()
     cursor.execute("SELECT COUNT(*) FROM Foglalasok WHERE terem_szam=?", (film[0],))
@@ -121,10 +122,9 @@ def open_booking(film):
     else:
         meter.configure(bootstyle="danger")
     meter.pack(pady=20)
-
-    # Foglalás rögzítése
+    
     def book_ticket():
-        nonlocal available_seats  # Így most már használhatjuk az 'available_seats' változót
+        nonlocal available_seats 
         first_name = first_name_entry.get()
         last_name = last_name_entry.get()
         ticket_type = ticket_type_var.get()
@@ -134,26 +134,21 @@ def open_booking(film):
                            (first_name, last_name, film[0], reserved_seats + 1, ticket_type))
             conn.commit()
 
-            # PDF generálás
             pdf = FPDF()
             pdf.add_page()
 
-            # Alapértelmezett betűtípus beállítása
             pdf.set_font("Arial", size=12)
 
-            # PDF tartalom hozzáadása
             pdf.cell(200, 10, txt=f"Foglalás - {film[1]}", ln=True)
             pdf.cell(200, 10, txt=f"Neved: {replace_special_chars(first_name)} {replace_special_chars(last_name)}", ln=True)
             pdf.cell(200, 10, txt=f"Jegytípus: {ticket_type}", ln=True)
             pdf.cell(200, 10, txt=f"Foglalás száma: {reserved_seats + 1}", ln=True)
 
-            # PDF mentése
             pdf.output(f"{replace_special_chars(first_name)}_{replace_special_chars(last_name)}_jegy.pdf")
 
-            available_seats -= 1  # Csökkentjük a szabad helyek számát
+            available_seats -= 1  
             meter.configure(value=(reserved_seats + 1) / film[5] * 100)
 
-            # Visszajelzés
             Label(window, text="Foglalás sikeres!", font=("Arial", 14), fg="green").pack(pady=10)
         else:
             Label(window, text="Nincs több szabad hely!", font=("Arial", 14), fg="red").pack(pady=10)
@@ -161,14 +156,12 @@ def open_booking(film):
     book_button = Button(window, text="Foglalás", command=book_ticket, font=("Arial", 16), width=15, bg="black", fg="white")
     book_button.pack(pady=20)
 
-# Ékezetek eltávolítása vagy helyettesítése
 def replace_special_chars(text):
     special_chars = {'á': 'a', 'é': 'e', 'í': 'i', 'ó': 'o', 'ö': 'o', 'ő': 'o', 'ú': 'u', 'ü': 'u', 'ű': 'u'}
     for char, replacement in special_chars.items():
         text = text.replace(char, replacement)
     return text
 
-# Statikus grafikon készítése
 def show_statistics():
     conn = sqlite3.connect("mozi.db")
     cursor = conn.cursor()
@@ -178,18 +171,18 @@ def show_statistics():
 
     rooms = [f"Terem {row[0]}" for row in stats]
     occupancy = [row[1] for row in stats]
-    
-    # A grafikonot itt generálhatod pl. Plotly vagy más eszközzel
 
 create_database()
 
 label = Label(root, text="MigaBiga", font=("Arial", 40))
 label.pack(pady=10)
 
+add_image()
+
 movie_button = Button(root, text="Filmlista", command=Filmlist, font=("Arial",24), width=7, height=2, bg="black", fg="white")
 movie_button.pack(pady=5)
 
-stats_button = Button(root, text="Statisztika", command=show_statistics, font=("Arial",24), width=7, height=2, bg="black", fg="white")
-stats_button.pack(pady=5)
+# stats_button = Button(root, text="Statisztika", command=show_statistics, font=("Arial",24), width=7, height=2, bg="black", fg="white")
+# stats_button.pack(pady=5)
 
 root.mainloop()
