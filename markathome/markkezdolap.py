@@ -174,7 +174,7 @@ def show_statistics():
 
 create_database()
 
-label = Label(root, text="MigaBiga", font=("Arial", 40))
+label = Label(root, text="MigaBigaCinema", font=("Arial", 40))
 label.pack(pady=10)
 
 add_image()
