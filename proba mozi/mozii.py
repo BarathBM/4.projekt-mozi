@@ -219,7 +219,7 @@ def jegy_pdf_keszitese(values):
     pdf.cell(200, 10, "Ne felejtsen el 15 perccel a kezdés elott érkezni.", ln=True)
     
 
-    pdf.image("SzoftProjekt/proba mozi/smile.png", 85, 200, 40)
+    pdf.image("proba mozi/smile.png", 85, 200, 40)
 
     pdf_path = os.path.join(script_dir, "jegyek", f"{keresztnev}.pdf")
 
